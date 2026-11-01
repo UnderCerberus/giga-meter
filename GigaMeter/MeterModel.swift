@@ -23,23 +23,25 @@ final class MeterModel {
     private let isDemo: Bool
 
     private init() {
+        let calendar = Calendar.current
         switch LaunchMode.current {
         case .live:
-            let loaded = store.load()
+            let loaded = LedgerStore.standard().load()
             ledger = loaded.ledger
             wasReset = loaded.wasReset
             isDemo = false
             showsOnboarding = !UserDefaults.standard.bool(forKey: Self.onboardedKey)
             snapshot = loaded.ledger.snapshot(now: Date(), calendar: calendar)
-            probe.removeIfLarger(thanBytes: Self.probeSizeLimit)
+            ProbeStore.standard().removeIfLarger(thanBytes: Self.probeSizeLimit)
         case .demo(let showsCarrierSheet):
             let now = LaunchMode.demoDate(calendar: calendar)
-            ledger = Ledger.demo(now: now, calendar: calendar)
+            let demo = Ledger.demo(now: now, calendar: calendar)
+            ledger = demo
             wasReset = false
             isDemo = true
             showsOnboarding = false
             self.showsCarrierSheet = showsCarrierSheet
-            snapshot = ledger.snapshot(now: now, calendar: calendar)
+            snapshot = demo.snapshot(now: now, calendar: calendar)
         }
     }
 

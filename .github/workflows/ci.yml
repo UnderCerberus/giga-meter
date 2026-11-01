@@ -8,3 +8,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: swift test --package-path ProbeKit
+  build:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: xcodegen generate
+      - run: >
+          xcodebuild
+          -project GigaProbe.xcodeproj
+          -scheme GigaProbe
+          -configuration Release
+          -sdk iphoneos
+          -derivedDataPath build
+          CODE_SIGNING_ALLOWED=NO
+          build
+      - name: Package IPA
+        run: |
+          APP=build/Build/Products/Release-iphoneos/GigaProbe.app
+          codesign --force --sign - --entitlements ProbeWidget/GigaProbeWidget.entitlements "$APP/PlugIns/GigaProbeWidget.appex"
+          codesign --force --sign - --entitlements Probe/GigaProbe.entitlements "$APP"
+          mkdir Payload
+          cp -R "$APP" Payload/
+          zip -qry GigaProbe.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GigaProbe-ipa
+          path: GigaProbe.ipa

@@ -53,9 +53,11 @@ struct CarrierSheet: View {
                     .foregroundStyle(Theme.textPrimary)
                     .tint(Theme.accent)
                     .monospacedDigit()
+                    .fixedSize()
                 Text("GB")
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
+                Spacer(minLength: 0)
             }
             .padding(.vertical, 4)
             .reveal(delay: 0.15)

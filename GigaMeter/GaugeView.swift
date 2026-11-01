@@ -19,15 +19,6 @@ struct GaugeView: View {
 
     var body: some View {
         ZStack {
-            RadialGradient(
-                colors: [Theme.accent.opacity(0.10), .clear],
-                center: .center,
-                startRadius: 40,
-                endRadius: Self.size * 0.72
-            )
-            .frame(width: Self.size * 1.4, height: Self.size * 1.4)
-            .opacity(drawn)
-
             Circle()
                 .stroke(Theme.track, lineWidth: Self.lineWidth)
 
@@ -75,6 +66,18 @@ struct GaugeView: View {
             }
         }
         .frame(width: Self.size, height: Self.size)
+        .background {
+            // 光はレイアウトに影響させない
+            RadialGradient(
+                colors: [Theme.accent.opacity(0.10), .clear],
+                center: .center,
+                startRadius: 40,
+                endRadius: Self.size * 0.72
+            )
+            .frame(width: Self.size * 1.4, height: Self.size * 1.4)
+            .opacity(drawn)
+            .allowsHitTesting(false)
+        }
         .padding(.vertical, 6)
         .animation(.smooth(duration: 0.8), value: scale)
         .animation(.smooth(duration: 0.8), value: total)

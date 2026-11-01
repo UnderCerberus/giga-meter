@@ -1,0 +1,66 @@
+name: ui-preview
+on:
+  workflow_dispatch:
+jobs:
+  preview:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: xcodegen generate
+      - name: Boot simulator
+        run: |
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)['devices']
+          runtimes = sorted((r for r in data if 'iOS' in r), reverse=True)
+          for runtime in runtimes:
+              phones = [d for d in data[runtime] if d['name'].startswith('iPhone') and 'Pro' in d['name'] and 'Max' not in d['name']] or [d for d in data[runtime] if d['name'].startswith('iPhone')]
+              if phones:
+                  print(phones[0]['udid'])
+                  break
+          ")
+          echo "DEVICE=$DEVICE" >> "$GITHUB_ENV"
+          xcrun simctl boot "$DEVICE"
+          xcrun simctl bootstatus "$DEVICE" -b
+          xcrun simctl ui "$DEVICE" appearance dark
+          xcrun simctl status_bar "$DEVICE" override --time 9:41 --batteryLevel 100 --cellularBars 4
+      - run: >
+          xcodebuild
+          -project GigaMeter.xcodeproj
+          -scheme GigaMeter
+          -configuration Debug
+          -destination "id=$DEVICE"
+          -derivedDataPath build
+          CODE_SIGNING_ALLOWED=NO
+          build
+      - name: Capture
+        run: |
+          APP=build/Build/Products/Debug-iphonesimulator/GigaMeter.app
+          ID=com.undercerberus.gigameter
+          mkdir screens
+          xcrun simctl install "$DEVICE" "$APP"
+
+          xcrun simctl io "$DEVICE" recordVideo --codec=h264 --force screens/launch.mp4 &
+          RECORDER=$!
+          sleep 2
+          xcrun simctl launch "$DEVICE" "$ID" -demo
+          sleep 6
+          xcrun simctl io "$DEVICE" screenshot screens/1-main.png
+          kill -INT "$RECORDER"
+          wait "$RECORDER" || true
+
+          xcrun simctl terminate "$DEVICE" "$ID"
+          xcrun simctl launch "$DEVICE" "$ID" -demo -demo-carrier
+          sleep 4
+          xcrun simctl io "$DEVICE" screenshot screens/2-carrier.png
+
+          xcrun simctl terminate "$DEVICE" "$ID"
+          xcrun simctl launch "$DEVICE" "$ID"
+          sleep 4
+          xcrun simctl io "$DEVICE" screenshot screens/3-onboarding.png
+          ls -la screens
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ui-preview
+          path: screens

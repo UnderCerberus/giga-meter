@@ -1,8 +1,7 @@
 import BackgroundTasks
-import ProbeKit
 import SwiftUI
 
-private let refreshTaskId = "com.undercerberus.gigaprobe.refresh"
+private let refreshTaskId = "com.undercerberus.gigameter.refresh"
 
 private func scheduleRefresh() {
     let request = BGAppRefreshTaskRequest(identifier: refreshTaskId)
@@ -11,18 +10,20 @@ private func scheduleRefresh() {
 }
 
 @main
-struct ProbeApp: App {
+struct GigaMeterApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+                .environment(MeterModel.shared)
+                .preferredColorScheme(.dark)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { scheduleRefresh() }
         }
         .backgroundTask(.appRefresh(refreshTaskId)) {
-            try? ProbeRecorder.record(trigger: .background, note: nil, store: ProbeStore.shared())
+            await MeterModel.shared.measure(trigger: .background)
             scheduleRefresh()
         }
     }

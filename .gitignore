@@ -3,10 +3,7 @@
 build/
 Payload/
 *.ipa
-Probe/Info.plist
-Probe/GigaProbe.entitlements
-ProbeWidget/Info.plist
-ProbeWidget/GigaProbeWidget.entitlements
+GigaMeter/Info.plist
 probe-data/
 artifacts/
 .DS_Store

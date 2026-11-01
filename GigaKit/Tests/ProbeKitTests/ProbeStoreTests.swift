@@ -9,7 +9,7 @@ final class ProbeStoreTests: XCTestCase {
         url = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("jsonl")
-        store = ProbeStore(fileURL: url, isShared: false)
+        store = ProbeStore(fileURL: url)
     }
 
     override func tearDown() {
@@ -52,6 +52,14 @@ final class ProbeStoreTests: XCTestCase {
         XCTAssertEqual(recorded.note, "メモ")
         XCTAssertTrue(recorded.interfaces.allSatisfy { CounterReader.isTarget(name: $0.name) })
         XCTAssertEqual(store.load(), [recorded])
+    }
+
+    func testRemoveIfLargerKeepsSmallFilesAndDeletesLargeOnes() throws {
+        try store.append(sample(1))
+        store.removeIfLarger(thanBytes: 1_000_000)
+        XCTAssertEqual(store.load().count, 1)
+        store.removeIfLarger(thanBytes: 1)
+        XCTAssertEqual(store.load(), [])
     }
 
     func testCSVHasOneRowPerInterfaceAndEscapesNote() {

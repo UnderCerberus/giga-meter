@@ -9,6 +9,20 @@
 
 無料Apple IDの署名は7日で切れる。切れたら同じ手順で入れ直す。記録は残る。
 
+## 7日ごとの自動更新
+
+Sideloadlyの常駐プログラム(`sideloadlydaemon.exe`)が、PCからiPhoneが見えるときに署名を更新する。
+
+1. iPhoneをUSBでつなぎ、iTunesを開く
+2. iPhoneのアイコン →「概要」→「オプション」→「Wi-Fi経由でこのiPhoneと同期」をオンにする
+3. 「同期」→「完了」を押す
+
+見張りツールが毎日12時とログオン時に動き、更新が止まっていたらWindowsの通知で知らせる。
+
+- 状態の確認: `python tools/refresh_watch.py --status`
+- 登録: `tools/install_refresh_watch.ps1`
+- 解除: `Unregister-ScheduledTask -TaskName GigaMeterRefreshWatch -Confirm:$false`
+
 ## 残りの確認
 
 右上のアイコンから診断画面を開き、各確認の前後でメモを付けて「今すぐ記録」を押す。

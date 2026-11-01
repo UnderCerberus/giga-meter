@@ -6,4 +6,5 @@ Payload/
 GigaMeter/Info.plist
 probe-data/
 artifacts/
+__pycache__/
 .DS_Store

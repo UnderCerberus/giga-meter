@@ -4,6 +4,8 @@ import SwiftUI
 struct DailyBars: View {
     private static let chartHeight: CGFloat = 92
     private static let minimumBar: CGFloat = 3
+    // わずかな通信で棒が満タンに見えないよう、目盛りの上限は最低1GBにする
+    private static let minimumPeak = 1_000_000_000.0
 
     let snapshot: UsageSnapshot
 
@@ -12,7 +14,7 @@ struct DailyBars: View {
     @State private var selectedDay: Int?
 
     private var peak: Double {
-        max(snapshot.bars.map(\.bytes).max() ?? 0, snapshot.dailyPace, 1)
+        max(snapshot.bars.map(\.bytes).max() ?? 0, snapshot.dailyPace, Self.minimumPeak)
     }
 
     var body: some View {

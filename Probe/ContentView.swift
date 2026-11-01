@@ -17,6 +17,8 @@ struct ContentView: View {
             List {
                 Section("状態") {
                     LabeledContent("App Group", value: store.isShared ? "OK" : "NG")
+                    LabeledContent("バンドルID", value: Bundle.main.bundleIdentifier ?? "不明")
+                    LabeledContent("許可グループ", value: allowedGroups)
                     LabeledContent("起動時刻", value: bootTime.formatted(date: .abbreviated, time: .standard))
                     LabeledContent("記録数", value: String(samples.count))
                     if let errorText {
@@ -62,6 +64,11 @@ struct ContentView: View {
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active { record(.app, note: nil) }
         }
+    }
+
+    private var allowedGroups: String {
+        let groups = ProvisioningProfile.currentAppGroups()
+        return groups.isEmpty ? "なし" : groups.joined(separator: ", ")
     }
 
     private func record(_ trigger: ProbeTrigger, note: String?) {

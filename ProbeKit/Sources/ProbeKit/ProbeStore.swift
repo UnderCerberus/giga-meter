@@ -14,8 +14,11 @@ public final class ProbeStore {
     // App Groupが使えない環境でも動かし、isSharedで結果を画面に出す
     public static func shared() -> ProbeStore {
         let manager = FileManager.default
-        if let container = manager.containerURL(forSecurityApplicationGroupIdentifier: appGroupId) {
-            return ProbeStore(fileURL: container.appendingPathComponent("samples.jsonl"), isShared: true)
+        // 再署名でグループ名が変わる場合に備え、署名プロファイルのグループも試す
+        for group in [appGroupId] + ProvisioningProfile.currentAppGroups() {
+            if let container = manager.containerURL(forSecurityApplicationGroupIdentifier: group) {
+                return ProbeStore(fileURL: container.appendingPathComponent("samples.jsonl"), isShared: true)
+            }
         }
         let documents = manager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return ProbeStore(fileURL: documents.appendingPathComponent("samples.jsonl"), isShared: false)

@@ -13,7 +13,8 @@ struct GaugeView: View {
     @State private var drawn: Double = 0
     @State private var projected: Double = 0
 
-    private var radius: CGFloat { (Self.size - Self.lineWidth) / 2 }
+    // strokeは円の縁を中心に描かれるので、弧の中心線の半径はフレームの半分
+    private var radius: CGFloat { Self.size / 2 }
     private var usedFraction: Double { scale.used * drawn }
     private var arcStyle: StrokeStyle { StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round) }
 
@@ -78,7 +79,7 @@ struct GaugeView: View {
             .opacity(drawn)
             .allowsHitTesting(false)
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 12)
         .animation(.smooth(duration: 0.8), value: scale)
         .animation(.smooth(duration: 0.8), value: total)
         .accessibilityElement(children: .ignore)
